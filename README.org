@@ -1,0 +1,494 @@
+#+TITLE: okejoke - A joke display CLI utility tool.
+#+AUTHOR: lloydlobo
+#+STARTUP: showeverything
+#+OPTIONS: num:nil ^:{}
+#+PROPERTY: header-args :tangle yes :results none
+-----
+
+* Table of Contents :toc:
+- [[#source][Source]]
+  - [[#okejokecmdrandomgo][okejoke/cmd/random.go]]
+  - [[#okejokecmdrootgo][okejoke/cmd/root.go]]
+  - [[#okejokelogologogo][okejoke/logo/logo.go]]
+  - [[#okejokemaingo][okejoke/main.go]]
+  - [[#okejokespinspinnergo][okejoke/spin/spinner.go]]
+- [[#references][References]]
+  - [[#part-1-go--cobra--api-calls-with-http-package][Part 1: Go + Cobra + API calls with http package]]
+  - [[#part-2---terms][Part 2: --terms]]
+  - [[#tutorial][Tutorial]]
+- [[#ideas][IDEAS]]
+  - [[#let-the-user-like-or-save-the-last-joke][Let the user like or save the last joke]]
+  - [[#let-the-use-view-the-history-of-jokes-and-more-stats][Let the use view the history of jokes. and more stats.]]
+  - [[#rate-the-joke][Rate the joke?]]
+  - [[#submit-a-joke][Submit a joke?]]
+  - [[#grep-the-first-joke-while-go-routine-is-holding-and-process-a-word-from-it-and-finish-with-another-similar-joke][Grep the first joke, while go routine is holding, and process a word from it and finish with another similar joke.]]
+  - [[#][]]
+
+* Source
+** okejoke/cmd/random.go
+** okejoke/cmd/root.go
+** okejoke/logo/logo.go
+#+begin_src go main: no :comments link :tangle ./logo/logo.go
+package logo
+
+// it works
+import (
+	"fmt"
+
+	"github.com/fatih/color"
+)
+
+func PrintLogo() {
+	okejoke := `
+        _         _       _
+   ___ | | _____ (_) ___ | | _____
+  / _ \| |/ / _ \| |/ _ \| |/ / _ \
+ | (_) |   <  __/| | (_) |   <  __/
+  \___/|_|\_\___|/ |\___/|_|\_\___|
+               |__/
+    `
+	color.Set(color.FgRed)
+	fmt.Printf("%v\n", okejoke)
+	color.Unset()
+}
+#+end_src
+** okejoke/main.go
+** okejoke/spin/spinner.go
+#+begin_src go
+
+#+end_src
+
+* References
+** Part 1: Go + Cobra + API calls with http package
+*** URL: <https://divrhino.com/articles/build-command-line-tool-go-cobra/>
+*** Overview
+This is part of a series of articles. Read the other parts here:
+    - Building a command line tool with Go and Cobra
+    - Adding flags to a command line tool built with Go and Cobra
+
+In this tutorial, we will learn how to build a basic CLI tool with Go and Cobra. Go is very useful for building powerful CLI tools services and tools for productivity. They are a great way to automate all sorts of different everyday tasks. And who doesn’t need a Dadjoke at least once a day, right? We are going to learn how to build a little CLI tool that will use the icanhazdadjoke api to give us a random dad joke.
+*** Prerequisites
+To follow along with this tutorial, you will need to have Go and Cobra installed.
+Installation guides:
+    - Go
+    - Cobra generator
+
+*** Initializing the project
+
+In the terminal, we can first create a new directory for our project. We can then immediately change into the new directory and generate a new app, giving it a package name. Usually, a package would be a url you own.
+
+In this case, we’ve named it as a github repo. You can change the example to your own Github user name.
+
+
+**** Init Cobra
+#+begin_example sh
+cd projects/go
+mkdir dadjoke
+cd okejoke
+# Error: Please run `go mod init <MODNAME>` before `cobra init`
+go mod init okejoke
+# cobra init --pkg-name github.com/example/dadjoke
+# `.` for directory path
+cobra init . github.com/example/dadjoke
+#+end_example
+If we run the ls command in the terminal, we can see the files that the cobra init command created for us.
+#+begin_example sh
+ls
+#+end_example
+
+**** We now have a license, a cmd folder and a main.go file
+    - LICENSE
+    - a cmd folder
+    - a main.go file
+
+Cobra just uses the main.go file as an entry point. We won’t be putting any of our CLI application code here. Instead, most of our code will be put in the cmd folder.
+
+**** Init go mod
+We will also want to use Go modules in our project, to handle our dependencies. We will run the go mod init command, in the terminal, to initialise Go modules. Here we are using the same package name we had used earlier when generating our cobra app.
+
+#+begin_example sh
+go mod init github.com/lloydlobo/okejoke
+#+end_example
+
+This creates a go.mod file, which will help us manage our dependencies.
+*** Creating commands
+
+If we run go run main.go in our terminal for the first time, all our dependencies will be installed and a go.sum file will also be created. This can be thought of as a lock file. It is used to verify that the checksum of dependencies have not changed.
+
+We will also see a print out about our CLI, including the description, usage and available commands. Right now, we only have the help command.
+
+#+begin_example sh
+go run main.go
+#+end_example
+
+Cobra gives us some boilerplate content, including a description of what our app does. We should probably go and update this to use a description that better describes the dadjoke app we’re building
+
+Let’s open up the cmd/root.go file and and update the description of our newly-created root command. Replace the default content with your own Short and Long descriptions:
+
+#+begin_example go
+var rootCmd = &cobra.Command{
+	Use:   "okejoke",
+	Short: "Get random dad jokes in your terminal",
+	Long:  `Dadjoke CLI is a tool that gives you a random dad joke`,
+}
+#+end_example
+
+If we run our app now, go run main.go, we will see the description we just wrote. Currently, our app does not have any available commands to list.
+
+So let’s now create the random command. Cobra gives us the add command that allows us to do this, easily. In the terminal, make sure you’re in your project root and run the following command:
+
+
+#+begin_example sh
+cobra add random
+#+end_example
+
+The add command generates a new cmd/random.go file for us.
+
+So if we run go run main.go, we will see that random is now one of our available commands. How cool is that?
+
+#+begin_example sh
+go run main.go
+#+end_example
+
+If we run our random command right now, we’ll see that it has some boilerplate description, just like the root command we saw previously. We will want to update this description too. Go into your cmd/random.go file and add a Short and Long description:
+
+#+begin_example go
+var randomCmd = &cobra.Command{
+    Use:   "random",
+    Short: "Get a random dad joke",
+    Long:  `This command fetches a random dad joke from the icanhazdadjoke api`,
+    Run: func(cmd *cobra.Command, args []string) {
+    ...
+    },
+}
+#+end_example
+
+*** The dadjoke API - curl
+
+Let’s take a look at the documentation for the API we will be consuming. We will be using the free icanhazdadjoke API. This API doesn’t require authentication. The creators are nice enough to let us use it for free. The only thing they’re asking is that we add a custom User-Agent header. We can definitely do that.
+
+If we scroll down to the endpoints, we can see the cURL command. Let’s run it in our terminal and see what we get.
+
+#+begin_example sh
+curl -H "Accept: application/json" https://icanhazdadjoke.com/
+#+end_example
+
+Here we see that it returns an ID, a joke and a status. Let’s quickly represent this in our code before we move on. Inside cmd/random.go, create a new type Joke struct:
+
+#+begin_example go
+package cmd
+
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+)
+
+var randomCmd = &cobra.Command{
+	Use:   "random",
+	Short: "Get a random dad joke",
+	Long:  `This command fetches a random dad joke from the icanhazdadjoke api`,
+	Run: func(cmd *cobra.Command, args []string) {
+		...
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(randomCmd)
+}
+
+type Joke struct {
+	ID     string `json:"id"`
+	Joke   string `json:"joke"`
+	Status int    `json:"status"`
+}
+#+end_example
+
+*** Get request in Go
+
+Now let’s try to make that API call in Go.
+
+We will be doing most of our work in the random.go file. Right now, our Run function merely prints out a message. Let’s create a function called getRandomJoke. We will call this function inside the Run method. And let’s just print a message for now, just to see if it works.
+
+In our random.go file, add a new getRandomJoke() method and call it from inside Run:
+#+begin_example go
+package cmd
+
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+)
+
+var randomCmd = &cobra.Command{
+	Use:   "random",
+	Short: "Get a random dad joke",
+	Long:  `This command fetches a random dad joke from the icanhazdadjoke api`,
+	Run: func(cmd *cobra.Command, args []string) {
+		getRandomJoke()
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(randomCmd)
+}
+
+type Joke struct {
+	ID     string `json:"id"`
+	Joke   string `json:"joke"`
+	Status int    `json:"status"`
+}
+
+func getRandomJoke() {
+	fmt.Println("Get random dad joke :P")
+}
+#+end_example
+
+If we run our random command in the terminal now, we will see our message from the Println on line 25
+#+begin_example sh
+go run main.go random
+#+end_example
+
+*** Looking at the http package
+
+Next, let’s create a function that will make a GET request to the API endpoint. We’re going to use that to get our random joke data. We can use the net/http package to achieve this.
+
+First things first, let’s visit the net/http documentation to get a better idea of how we can use it. We can visit https://golang.org/pkg/net/http/ and search for func Get. Since we know we want to make a GET request. Here, we see this line that says
+http func GET documentation
+Image: http func GET documentation
+
+    To make a request with custom headers, use NewRequest and DefaultClient.Do.
+
+If you remember, the API maintainers would like us to add a custom header to our app, so this is what we’re looking for.
+*** The getJokeData() method
+
+We will create a function that we can use to make GET requests to the icanhazdadjoke API endpoint
+#+begin_src go
+
+package cmd
+
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+)
+
+var randomCmd = &cobra.Command{
+	Use:   "random",
+	Short: "Get a random dad joke",
+	Long:  `This command fetches a random dad joke from the icanhazdadjoke api`,
+	Run: func(cmd *cobra.Command, args []string) {
+		getRandomJoke()
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(randomCmd)
+}
+
+type Joke struct {
+	ID     string `json:"id"`
+	Joke   string `json:"joke"`
+	Status int    `json:"status"`
+}
+
+func getRandomJoke() {
+	fmt.Println("Get random dad joke :P")
+}
+
+func getJokeData(baseAPI string) []byte {}
+
+#+end_src
+
+Inside the body of the getJokeData() function, we will create a new request using the NewRequest() method from the net/http package
+
+
+
+#+begin_src go
+
+
+package cmd
+
+import (
+	"fmt"
+	"net/http"
+	"io/ioutil"
+
+	"github.com/spf13/cobra"
+)
+
+var randomCmd = &cobra.Command{
+	Use:   "random",
+	Short: "Get a random dad joke",
+	Long:  `This command fetches a random dad joke from the icanhazdadjoke api`,
+	Run: func(cmd *cobra.Command, args []string) {
+		getRandomJoke()
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(randomCmd)
+}
+
+type Joke struct {
+	ID     string `json:"id"`
+	Joke   string `json:"joke"`
+	Status int    `json:"status"`
+}
+
+func getRandomJoke() {
+	fmt.Println("Get random dad joke :P")
+}
+
+func getJokeData(baseAPI string) []byte {
+	request, err := http.NewRequest(
+		http.MethodGet, //method
+		baseAPI,        //url
+		nil,            //body
+	)
+
+	if err != nil {
+		log.Printf("Could not request a dadjoke. %v", err)
+	}
+
+	request.Header.Add("Accept", "application/json")
+	request.Header.Add("User-Agent", "Dadjoke CLI (https://github.com/example/dadjoke)")
+}
+#+end_src
+
+New code explanations:
+
+#+begin_example
+- Line 5
+    - Import net/http package
+- Line 6
+    - Import io/ioutil package
+- Line 35
+    - Use the http.NewRequest() method to create a new request
+- Line 36
+    - First argument is an HTTP method
+- Line 37
+    - Second argument is a url
+- Line 38
+    - Third argument is a request body. Remember the comma at the end.
+- Lines 41-43
+    - Handle the error that is returned from http.NewRequest()
+- Line 45
+    - Add a header to tell the API we want our data returned as JSON
+- Line 46
+    - Add a custom User-Agent header to tell the API maintainers how we’re using their API
+#+end_example
+
+The completed getJokeData() method:
+#+begin_src go
+
+func getJokeData(baseAPI string) []byte {
+	request, err := http.NewRequest(
+		http.MethodGet, //method
+		baseAPI,        //url
+		nil,            //body
+	)
+
+	if err != nil {
+		log.Printf("Could not request a dadjoke. %v", err)
+	}
+
+	request.Header.Add("Accept", "application/json")
+	request.Header.Add("User-Agent", "Dadjoke CLI (https://github.com/example/dadjoke)")
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		log.Printf("Could not make a request. %v", err)
+	}
+
+	responseBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Printf("Could not read response body. %v", err)
+	}
+
+	return responseBytes
+}
+#+end_src
+
+New code explanations:
+
+#+begin_example
+- Line 48
+    - Pass the request to the http.DefaultClient.Do() method to get a response
+- Lines 49-51
+    - Handle error that is returned from http.DefaultClient.Do() method
+- Line 53
+    - Pass the resonseBody to the ioutil.ReadAll() to read it into bytes
+- Lines 54-56
+    - Handle error that is returned from ioutil.ReadAll() method
+- Line 58
+    - Return response as bytes
+#+end_example
+
+*** Finishing the getRandomJoke() method
+
+Let’s re-visit our getRandomJoke method so we can use our getJokeData method.
+
+#+begin_src go
+func getRandomJoke() {
+	url := "https://icanhazdadjoke.com/"
+	responseBytes := getJokeData(url)
+	joke := Joke{}
+
+	if err := json.Unmarshal(responseBytes, &joke); err != nil {
+		fmt.Printf("Could not unmarshal reponseBytes. %v", err)
+	}
+
+	fmt.Println(string(joke.Joke))
+}
+#+end_src
+
+New code explanations:
+
+#+begin_example
+- Line 2
+    - Store the API url in the url variable
+- Line 3
+    - Pass url into the getJokeData() method and store the returned reponse bytes in a variable
+- Line 4
+    - Create a new Joke struct. We will save data into this when we unmarshal the reponse
+- Lines 6-8
+    - Unmarshal the response, passing in responseBytes and url to http.Unmarshal as arguments
+    - Also handle the error that is returned
+- Line 10
+    - Convert joke.Joke to a string and print it to the terminal
+#+end_example
+
+Let’s go back to our terminal and run the command to get a random joke:
+
+#+begin_src shell
+go run main.go
+#+end_src
+
+*** Conclusion Part 1
+
+In this tutorial we learnt how to create a command-line application with Go and Cobra. In part 2, we will learn how to implement a flag for our random command.
+
+Congratulations, you did great. Keep learning and keep coding. Bye for now.
+*** Resources
+
+    https://golang.org/dl/
+    https://github.com/spf13/cobra
+    https://github.com/spf13/cobra/blob/master/cobra/README.md
+    https://golangbyexample.com/go-mod-sum-module/
+
+**** Related articles
+
+    Adding flags to a command line tool built with Go and Cobra
+    Building an interactive CLI app with Go, Cobra & promptui
+    How to build a web scraper with Go and Colly
+** Part 2: --terms
+** Tutorial
+**** URL: https://www.youtube.com/watch?v=-tO7zSv80UY&t=247s
+* IDEAS
+** Let the user like or save the last joke
+** Let the use view the history of jokes. and more stats.
+** Rate the joke?
+** Submit a joke?
+** Grep the first joke, while go routine is holding, and process a word from it and finish with another similar joke.
+**
