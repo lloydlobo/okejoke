@@ -8,7 +8,8 @@ import (
 	"net/http"
 )
 
-// data := DataJSON{} // Store data in a variable.
+// data := DataJSON{}
+// Store data in a variable.
 type DataJSON struct {
 	ID     string `json:"id"`
 	Body   string `json:"joke"`
@@ -18,15 +19,9 @@ type DataJSON struct {
 /*
 Construct SearchResJSON with curl results.
 $ curl -H "Accept: application/json" https://icanhazdadjoke.com/search
-{ "current_page":1,"limit":20,"next_page":2,"previous_page":1,
-    "results":[ {"id":"0189hNRf2g","joke":"I'm tired of following my dreams. I'm just going to ask them where they are going and meet up with them later."},{"id":"08EQZ8EQukb","joke":"Did you hear about the guy whose whole left side was cut off? He's all right now."},{"id":"08xHQCdx5Ed","joke":"Why didn\u2019t the skeleton cross the road? Because he had no guts."},{"id":"0DQKB51oGlb"," joke":"What did one nut say as he chased another nut?  I'm a cashew!"},{"id":"0DtrrOZDlyd","joke":"Chances are if you' ve seen one shopping center, you've seen a mall."},{"id":"0LuXvkq4Muc","joke":"I knew I shouldn't steal a mixer from work, but it was a whisk I was willing to take."},{"id":"0ga 2EdN7prc","joke":"How come the stadium got hot after the game? Because all of the fans left."},{"id":"0oO71TSv4Ed","joke":"Why was it called the dar k ages? Because of all the knights. "},{"id":"0oz51ozk3ob","joke":"A steak pun is a rare medium well done."},{"id":"0ozAXv4Mmjb","joke":"Why did the tomato blush? Because it saw the salad dressing."},{"id":"0wcFBQfiGBd","joke":"Did you hear the joke about the wandering nun? She was a roman catho lic."},{"id":"189xHQ7pOuc","joke":"What creature is smarter than a talking parrot? A spelling bee."},{"id":"18Elj3EIYvc","joke":"I'll tell you what often gets over looked... garden fences."},{"id":"18h3wcU8xAd","joke":"Why did the kid cross the playground? To get to the other slide."},{"id":"1DI RSfx51Dd","joke":"Why do birds fly south for the winter? Because it's too far to walk."},{"id":"1DQZDY0gVnb","joke":"What is a centipedes's favorite Beatle song?  I want to hold your hand, hand, hand, hand..."},{"id":"1DQZvXvX8Ed","joke":"My first time using an elevator was an uplifting experien ce. The second time let me down."},{"id":"1DQZvcFBdib","joke":"To be Frank, I'd have to change my name."},{"id":"1Dt4M7Ufaxc","joke":"Slept like a l og last night \u2026 woke up in the fireplace."},{"id":"1T01LBXLuzd","joke":"Why does a Moon-rock taste better than an Earth-rock? Because it's a li ttle meteor."}
-    ],
-  "search_term":"", "status":200, "total_jokes":649, "total_pages":33 }
+{ "current_page":1,"limit":20,"next_page":2,"previous_page":1, "results":[ {"id":"0189hNRf2g","joke":"I'm tired of following my dreams. I'm just going to ask them where they are going and meet up with them later."},{"id":"08EQZ8EQukb","joke":"Did you hear about the guy whose whole left side was cut off? He's all right now."},{"id":"08xHQCdx5Ed","joke":"Why didn\u2019t the skeleton cross the road? Because he had no guts."},{"id":"0DQKB51oGlb"," joke":"What did one nut say as he chased another nut?  I'm a cashew!"},{"id":"0DtrrOZDlyd","joke":"Chances are if you' ve seen one shopping center, you've seen a mall."},{"id":"0LuXvkq4Muc","joke":"I knew I shouldn't steal a mixer from work, but it was a whisk I was willing to take."},{"id":"0ga 2EdN7prc","joke":"How come the stadium got hot after the game? Because all of the fans left."},{"id":"0oO71TSv4Ed","joke":"Why was it called the dar k ages? Because of all the knights. "},{"id":"0oz51ozk3ob","joke":"A steak pun is a rare medium well done."},{"id":"0ozAXv4Mmjb","joke":"Why did the tomato blush? Because it saw the salad dressing."},{"id":"0wcFBQfiGBd","joke":"Did you hear the joke about the wandering nun? She was a roman catho lic."},{"id":"189xHQ7pOuc","joke":"What creature is smarter than a talking parrot? A spelling bee."},{"id":"18Elj3EIYvc","joke":"I'll tell you what often gets over looked... garden fences."},{"id":"18h3wcU8xAd","joke":"Why did the kid cross the playground? To get to the other slide."},{"id":"1DI RSfx51Dd","joke":"Why do birds fly south for the winter? Because it's too far to walk."},{"id":"1DQZDY0gVnb","joke":"What is a centipedes's favorite Beatle song?  I want to hold your hand, hand, hand, hand..."},{"id":"1DQZvXvX8Ed","joke":"My first time using an elevator was an uplifting experien ce. The second time let me down."},{"id":"1DQZvcFBdib","joke":"To be Frank, I'd have to change my name."},{"id":"1Dt4M7Ufaxc","joke":"Slept like a l og last night \u2026 woke up in the fireplace."},{"id":"1T01LBXLuzd","joke":"Why does a Moon-rock taste better than an Earth-rock? Because it's a li ttle meteor."}
+], "search_term":"", "status":200, "total_jokes":649, "total_pages":33 }
 */
-// # Find search terms with wildcard-globbing
-// url := fmt.Sprintf("https://icanhazdadjoke.com/search?term=%s", jokeTerm) // Construct API url with search term user passes in.
-// curl -H "Accept: application/json" "https://icanhazdadjoke.com/search?term=hipster"
-// "search_term":"","status":200,"total_jokes":649,"total_pages":33
 type SearcResJSON struct {
 	Results    json.RawMessage `json:"results"`
 	SearchTerm string          `json:"search_term"`
@@ -34,55 +29,83 @@ type SearcResJSON struct {
 	TotalJokes int             `json:"total_jokes"`
 }
 
-// FetchApiData requests, gets response with custom headers.
-// and then returns the parsed response.Body bytes into string.
+//////////////////////////////////////////////////////////////////////
+// FetchApiData Methods:
+//////////////////////////////////////////////////////////////////////
 //
-// Requirements : $ curl -H "Accept: application/json" https://icanhazdadjoke.com/
-// API response format:
-// All API endpoints follow their respective browser URLs,
-// but we adjust the response formatting to be more suited for an,
+// Store data in a variable.
+// request, add headers, get response, read & return response to bytes.
+
+// requestHttpAPI() requests the baseAPI url with GET method..
+func requestHttpAPI(baseAPI string) *http.Request {
+	req, err := http.NewRequest(http.MethodGet, baseAPI, nil)
+	if err != nil {
+		log.Printf("http.NewRequest: could not request an okejoke. %v", err)
+	}
+	return req
+}
+
+// Request Data from API endpoint.
+//
 // API based on the provided HTTP Accept header.
 // Accepted Accept headers:
 // - text/html - HTML response (default response format)
 // - application/json - JSON response
 // - text/plain - Plain text response
-// "Note: Requests made via curl which do not set an Accept header
-// will respond with text/plain by default."
+// "Note: Requests made via curl which do not set an Accept header will respond with text/plain by default."
+//
 // Custom user agent:
-// Setting a custom User-Agent header for your code will help us be able to better monitor
-// the usage of the API and identify potential bad actors.
-// A good user agent should include the name of the library or website
-// that is accessing the API along with a URL/e-email where someone
-// can be contacted regarding the library/website.
+// Setting a custom User-Agent header for your code will help us be able to better monitor the usage of the API and identify potential bad actors.
+// A good user agent should include the name of the library or website that is accessing the API along with a URL/e-email where someone can be contacted regarding the library/website.
+func addRequestHeaders(r *http.Request) {
+	r.Header.Add("Accept", "application/json")
+	r.Header.Add("User-Agent", "OkeJoke CLI (https://github.com/lloydlobo/okejoke)")
+}
+
+// Handle Response after Request Data from API endpoint.
+// API response format:
+// All API endpoints follow their respective browser URLs, but we adjust the response formatting to be more suited for an,
 // For example: curl -H "User-Agent: My Library (https://github.com/username/repo)" https://icanhazdadjoke.com/
-func FetchApiData(baseAPI string) []byte {
-	req, err := http.NewRequest(http.MethodGet, baseAPI, nil)
-	if err != nil {
-		log.Printf("http.NewRequest: could not request an okejoke. %v", err)
-	}
-	// Request Data from API endpoint.
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("User-Agent", "OkeJoke CLI (https://github.com/lloydlobo/okejoke)")
-	// Handle Response after Request Data from API endpoint.
-	res, err := http.DefaultClient.Do(req) // DefaultClient is the default Client and is used by Get, Head, and Post\.
+func getResponseFromRequest(r *http.Request) *http.Response {
+	res, err := http.DefaultClient.Do(r) // DefaultClient is the default Client and is used by Get, Head, and Post\.
 	if err != nil {
 		log.Printf("http.DefaultClient.Do: could not make a request. %v", err)
 	}
-	// ReadAll reads from r until an error or EOF and returns the data it read\.
-	body, err := io.ReadAll(res.Body) // field Body io.ReadCloser
+	return res
+}
+
+// ReadAll reads from r until an error or EOF and returns the data it read\.
+func readResponseBodyBytes(r *http.Response) []byte {
+	body, err := io.ReadAll(r.Body) // field Body io.ReadCloser
 	if err != nil {
 		log.Printf("io.ReadAll: could not read the response body. %v", err)
 	}
 	return body
 }
 
-// UnmarshalBytes
-// Unmarshal parses the JSON\-encoded data and stores the result
+//////////////////////////////////////////////////////////////////////
+// FetchApiData function for chaining `http` methods.
+//////////////////////////////////////////////////////////////////////
+
+// FetchApiData requests, gets response with custom headers.
+// and then returns the parsed response.Body bytes into string.
+//
+// Requirements : $ curl -H "Accept: application/json" https://icanhazdadjoke.com/
+func FetchApiData(baseAPI string) []byte {
+	req := requestHttpAPI(baseAPI)
+	addRequestHeaders(req)
+	res := getResponseFromRequest(req)
+	body := readResponseBodyBytes(res)
+	return body
+}
+
+// UnmarshalBytes parses the JSON\-encoded data and stores the result.
+//
 // in the value pointed to by v\. If v is nil or not a pointer,
-// Unmarshal returns an InvalidUnmarshalError\.
-func UnmarshalBytes(resB []byte, d DataJSON) DataJSON {
+// Unmarshal returns an InvalidUnmarshalError.
+func UnmarshalBytes(bRes []byte, d DataJSON) DataJSON {
 	if err := json.
-		Unmarshal(resB, &d); err != nil {
+		Unmarshal(bRes, &d); err != nil {
 		log.Printf("UnmarshalBytes: Could not unmarshal response bytes. %v", err)
 	}
 	return d
@@ -99,32 +122,15 @@ func GetJokeParseData() string {
 
 // FetchUserTermFlagData passes search term Cobra cmd random.go init() --flags.
 //
-// https://www.shell-tips.com/bash/wildcards-globbing/#gsc.tab=0
-// Wildcards	Description
+// Wildcards	Description  ---- https://www.shell-tips.com/bash/wildcards-globbing/#gsc.tab=0
 // ?	        A question-mark is a pattern that matches any single character.
 // *	        An asterisk is a pattern that matches any number of any characters, including the null string/none.
 // [...]        The square brackets matches any one of the enclosed characters.
 //
 //	17:34  ➜  go run main.go random --term=joke
 //
-//	       _         _       _
-//	  ___ | | _____ (_) ___ | | _____
-//	 / _ \| |/ / _ \| |/ _ \| |/ / _ \
-//	| (_) |   <  __/| | (_) |   <  __/
-//	 \___/|_|\_\___|/ |\___/|_|\_\___|
-//	              |__/
-//
-// Did you hear the joke about the wandering nun? She was a roman catholic.
-// FetchUserTermFlagData()2022/09/21 17:34:50 responseBytes: {"current_page":1,"limit":20,"next_page":1,"previous_page":1,"results":[{"id":"EYo4TCAdUf","
-// joke":"I tried to write a chemistry joke, but could never get a reaction."},{"id":"8USSSfVn3ob","joke":"I've been trying to come up with a dad joke ab
-// out momentum . . . but I just can't seem to get it going."},{"id":"21DQnbaaxc","joke":"Whoever invented the knock-knock joke should get a no bell priz
-// e."},{"id":"X8xAlq4E6Ed","joke":"What do I look like? A JOKE MACHINE!?"},{"id":"fiyPR7wPZDd","joke":"When does a joke become a dad joke? When it becom
-// es apparent."},{"id":"uPu4MRZLmrc","joke":"Want to hear a chimney joke? Got stacks of em! First one's on the house"},{"id":"0wcFBQfiGBd","joke":"Did y
-// ou hear the joke about the wandering nun? She was a roman catholic."},{"id":"rc2E6EdiNe","joke":"Want to hear my pizza joke? Never mind, it's too chee
-// sy."},{"id":"FBQ7wskbMmb","joke":"Want to hear a joke about construction? Nah, I'm still working on it."},{"id":"ozPmbFtWDlb","joke":"Some people say
-// that comedians who tell one too many light bulb jokes soon burn out, but they don't know watt they are talking about. They're not that bright."},{"id"
-// :"a218pbMmOmb","joke":"What's the best thing about elevator jokes? They work on so many levels."},{"id":"HYgiVDAscFd","joke":"People are making apocal
-// ypse jokes like there\u2019s no tomorrow."}],"search_term":"joke","status":200,"total_jokes":12,"total_pages":1}
+// # Find search terms with wildcard-globbing
+// curl -H "Accept: application/json" "https://icanhazdadjoke.com/search?term=hipster"
 func FetchUserTermFlagData(jokeTerm string) (totalJokes int, jokeList []DataJSON) {
 	url := fmt.Sprintf("https://icanhazdadjoke.com/search?term=%s", jokeTerm) // Construct API url with search term user passes in.
 	responseBytes := FetchApiData(url)                                        // Pass url into fetchData() method & store returned `response` bytes.
